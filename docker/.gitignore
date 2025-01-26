@@ -1,0 +1,2 @@
+/db/mysql/initdb.d/dump/*
+!/db/mysql/initdb.d/dump/.gitkeep

@@ -1,0 +1,24 @@
+services:
+  workspace:
+    container_name: ${COMPOSE_PROJECT_NAME}_workspace
+    build:
+      context: ./.devcontainer/workspace
+      dockerfile: Dockerfile
+      args:
+        USER_UID: "${HOST_UID}" # .envのHOST_UIDを渡す
+        USER_GID: "${HOST_GID}" # .envのHOST_GIDを渡す
+    env_file: ./.devcontainer/devcontainer.env
+    volumes:
+      - type: volume
+        source: php-fpm-socket
+        target: /run/php-fpm
+      - type: bind
+        source: ./
+        target: /var/www
+        consistency: cached
+    command: sleep infinity
+    working_dir: /var/www
+    depends_on:
+      - web
+    networks:
+      - common

@@ -1,0 +1,80 @@
+volumes:
+  mysql-data:
+    driver: local
+  redis-data:
+    driver: local
+
+services:
+  db:
+    container_name: ${COMPOSE_PROJECT_NAME}_db
+    image: mysql:${MYSQL_VERSION}
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    hostname: ${DB_HOST}
+    ports:
+      - "${HOST_ADDR}${DB_PORT}:3306"
+    volumes:
+      - type: volume
+        source: mysql-data
+        target: /var/lib/mysql
+      - type: bind
+        source: ./docker/db/mysql/initdb.d
+        target: /docker-entrypoint-initdb.d
+      - type: bind
+        source: ./docker/db/mysql/conf.d
+        target: /etc/mysql/conf.d
+    networks:
+      - common
+    healthcheck:
+      test: mysqladmin ping -h localhost -u root -p$$DB_ROOT_PASSWORD
+      interval: 30s
+      timeout: 5s
+      start_period: 30s
+      retries: 3
+
+  nosql:
+    container_name: ${COMPOSE_PROJECT_NAME}_nosql
+    image: redis:${REDIS_VERSION}
+    ports:
+      - "${HOST_ADDR}${REDIS_PORT}:6379"
+    volumes:
+      - type: volume
+        source: redis-data
+        target: /data
+      - type: bind
+        source: ./docker/nosql/redis/redis.conf
+        target: /etc/redis.conf
+    networks:
+      - common
+    profiles:
+      - nosql
+
+  queue:
+    container_name: ${COMPOSE_PROJECT_NAME}_queue
+    image: softwaremill/elasticmq:latest
+    ports:
+      - "${HOST_ADDR}9324:9324"
+      - "${HOST_ADDR}9325:9325"
+    volumes:
+      # 設定ファイル
+      - ./docker/queue/elasticmq/custom.conf://opt/elasticmq.conf:ro
+    networks:
+      - common
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:9324/health || exit 1" ]
+      interval: 30s
+      timeout: 5s
+      start_period: 30s
+      retries: 3
+
+  mail:
+    container_name: ${COMPOSE_PROJECT_NAME}_mail
+    image: mailhog/mailhog:latest
+    ports:
+      - "${HOST_ADDR}1025:1025"
+      - "${HOST_ADDR}8025:8025"
+    networks:
+      - common

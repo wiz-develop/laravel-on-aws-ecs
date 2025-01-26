@@ -1,0 +1,132 @@
+name: laravel-on-aws-ecs-backend
+
+networks:
+  common:
+    name: ${COMPOSE_PROJECT_NAME}_network
+    driver: bridge
+
+volumes:
+  php-fpm-socket:
+    driver: local
+  laravel-storage-src:
+    driver: local
+  laravel-storage-public:
+    driver: local
+  laravel-storage-sessions:
+    driver: local
+
+services:
+  web:
+    container_name: ${COMPOSE_PROJECT_NAME}_web
+    image: "${WEB_IMAGE_REPO_URI}:latest"
+    build:
+      target: production
+      # dockerfile: ./docker/web/apache/Dockerfile
+      dockerfile: ./docker/web/nginx/Dockerfile
+      additional_contexts:
+        # apache-ctx: ./docker/web/apache
+        nginx-ctx: ./docker/web/nginx
+      args:
+        BUILDKIT_INLINE_CACHE: 1
+        USER_UID: "${USER_UID-1000}"
+        USER_GID: "${USER_GID-1000}"
+      cache_from:
+        - "${WEB_IMAGE_REPO_URI}:latest"
+      tags:
+        - "${WEB_IMAGE_REPO_URI}:${IMAGE_TAG}"
+    ports:
+      - "${HOST_ADDR}${WEB_PORT}:80"
+    volumes:
+      - type: volume
+        source: php-fpm-socket
+        target: /run/php-fpm
+      - type: volume
+        source: laravel-storage-src
+        target: /var/www/src
+      - type: volume
+        source: laravel-storage-public
+        target: /mnt/storage/app/public
+    depends_on:
+      app:
+        condition: service_healthy
+    networks:
+      - common
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost/healthcheck || exit 1" ]
+      interval: 30s
+      timeout: 5s
+      start_period: 30s
+      retries: 3
+
+  app:
+    container_name: ${COMPOSE_PROJECT_NAME}_app
+    image: "${APP_IMAGE_REPO_URI}:latest"
+    build:
+      target: production
+      dockerfile: ./docker/app/php-fpm/Dockerfile
+      additional_contexts:
+        php-fpm-ctx: ./docker/app/php-fpm
+        src-ctx: ./src
+      args:
+        BUILDKIT_INLINE_CACHE: 1
+        USER_UID: "${USER_UID-1000}"
+        USER_GID: "${USER_GID-1000}"
+        PHP_VERSION: ${PHP_VERSION}
+      cache_from:
+        - "${APP_IMAGE_REPO_URI}:builder"
+        - "${APP_IMAGE_REPO_URI}:latest"
+      tags:
+        - "${APP_IMAGE_REPO_URI}:${IMAGE_TAG}"
+    env_file:
+      - ./src/.env
+    environment:
+      CONTAINER_ROLE: api
+    expose:
+      - 9000
+    volumes:
+      - type: volume
+        source: php-fpm-socket
+        target: /run/php-fpm
+      - type: volume
+        source: laravel-storage-src
+        target: /var/www/src
+      - type: volume
+        source: laravel-storage-public
+        target: /mnt/storage/app/public
+      - type: volume
+        source: laravel-storage-sessions
+        target: /mnt/storage/framework/sessions
+    depends_on:
+      - app-builder
+    networks:
+      - common
+    healthcheck:
+      test: [ "CMD-SHELL", "cgi-fcgi -bind -connect /run/php-fpm/www.sock 2>&1 || exit 1" ]
+      interval: 30s
+      timeout: 5s
+      start_period: 30s
+      retries: 3
+
+  app-builder:
+    container_name: ${COMPOSE_PROJECT_NAME}_app-builder
+    image: ${APP_IMAGE_REPO_URI}:builder
+    build:
+      target: builder
+      dockerfile: ./docker/app/php-fpm/Dockerfile
+      additional_contexts:
+        php-fpm-ctx: ./docker/app/php-fpm
+        src-ctx: ./src
+      args:
+        BUILDKIT_INLINE_CACHE: 1
+        USER_UID: "${USER_UID-1000}"
+        USER_GID: "${USER_GID-1000}"
+        PHP_VERSION: ${PHP_VERSION}
+      cache_from:
+        - "${APP_IMAGE_REPO_URI}:builder"
+      tags:
+        - "${APP_IMAGE_REPO_URI}:builder"
+    env_file:
+      - ./src/.env
+    command: /bin/true # NOTE: コンテナを即終了させるコマンド
+    networks:
+      - common

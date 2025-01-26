@@ -1,0 +1,1 @@
+-- NOTE: テーブル定義 (CREATE TABLE ...) などを記述

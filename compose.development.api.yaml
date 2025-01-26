@@ -1,0 +1,84 @@
+name: laravel-on-aws-ecs-backend
+
+networks:
+  common:
+    name: ${COMPOSE_PROJECT_NAME}_network
+    driver: bridge
+
+volumes:
+  php-fpm-socket:
+    driver: local
+
+services:
+  web:
+    container_name: ${COMPOSE_PROJECT_NAME}_web
+    build:
+      target: development
+      # dockerfile: ./docker/web/apache/Dockerfile
+      dockerfile: ./docker/web/nginx/Dockerfile
+      additional_contexts:
+        # apache-ctx: ./docker/web/apache
+        nginx-ctx: ./docker/web/nginx
+    ports:
+      - "${HOST_ADDR}${WEB_PORT}:80"
+    volumes:
+      - type: volume
+        source: php-fpm-socket
+        target: /run/php-fpm
+      - type: bind
+        source: ./src
+        target: /var/www/src
+        consistency: cached
+    depends_on:
+      app:
+        # condition: service_healthy
+        condition: service_started
+    networks:
+      - common
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost/healthcheck || exit 1" ]
+      interval: 30s
+      timeout: 5s
+      start_period: 30s
+      retries: 3
+
+  app:
+    container_name: ${COMPOSE_PROJECT_NAME}_app
+    build:
+      target: development
+      dockerfile: ./docker/app/php-fpm/Dockerfile
+      additional_contexts:
+        php-fpm-ctx: ./docker/app/php-fpm
+      args:
+        PHP_VERSION: ${PHP_VERSION}
+    env_file:
+      - ./src/.env
+    environment:
+      CONTAINER_ROLE: api
+    expose:
+      - 9000
+    volumes:
+      - type: volume
+        source: php-fpm-socket
+        target: /run/php-fpm
+      - type: bind
+        source: ./src
+        target: /var/www/src
+        consistency: cached
+    depends_on:
+      db:
+        condition: service_healthy
+      # nosql:
+      #   condition: service_healthy
+    networks:
+      - common
+      # healthcheck:
+      # NOTE: cgi-fcgi リクエストを送ると、zend_mm_heap corrupted が発生する重大な問題があるため、コメントアウト中。
+      #  参考: https://github.com/php/php-src/issues/15395
+      # PHP8.2以降の最新パッチバージョンでは修正されているが、PHP8.1系はまだ対応されていないっぽい。
+      # 参考: https://www.php.net/ChangeLog-8.php#PHP_8_1
+      # test: [ "CMD-SHELL", "cgi-fcgi -bind -connect /run/php-fpm/www.sock 2>&1 || exit 1" ]
+      # interval: 30s
+      # timeout: 5s
+      # start_period: 30s
+      # retries: 3

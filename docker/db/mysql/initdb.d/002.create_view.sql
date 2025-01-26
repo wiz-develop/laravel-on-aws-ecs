@@ -1,0 +1,1 @@
+-- NOTE: ビュー定義 (CREATE VIEW ...)などを記述

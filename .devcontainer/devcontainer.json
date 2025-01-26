@@ -1,0 +1,149 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
+// https://github.com/microsoft/vscode-dev-containers/tree/v0.245.2/containers/php-mariadb
+// Update the VARIANT arg in compose.yaml to pick a PHP version
+{
+	"name": "laravel-on-aws-ecs-backend-workspace",
+	"dockerComposeFile": [
+		// "../compose.production.yaml",
+		"../compose.development.api.yaml",
+		"../compose.development.infra.yaml",
+		// "../compose.development.batch.yaml",
+		// "../compose.development.worker.yaml",
+		"./compose.yaml"
+	],
+	"service": "workspace",
+	"workspaceFolder": "/var/www",
+	"remoteEnv": {
+		"CONTAINER_SRC_PATH": "${containerWorkspaceFolder}/src"
+	},
+	// Features to add to the dev container. More info: https://containers.dev/features.
+	"features": {
+		// "ghcr.io/customink/codespaces-features/docker-in-docker-amzn": {}
+	},
+	"initializeCommand": "bash ./.devcontainer/initializeCommand.sh",
+	// Use 'postCreateCommand' to run commands after the container is created.
+	"postCreateCommand": "bash ./.devcontainer/postCreateCommand.sh",
+	// Use 'postStartCommand' to run commands after the container is started.
+	"postStartCommand": "bash ./.devcontainer/postStartCommand.sh",
+	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+	"remoteUser": "vscode",
+	// Configure tool-specific properties.
+	"customizations": {
+		// Configure properties specific to VS Code.
+		"vscode": {
+			// Add the IDs of extensions you want installed when the container is created.
+			"extensions": [
+				// for Composer
+				"DEVSENSE.composer-php-vscode",
+				// for PHP
+				"bmewburn.vscode-intelephense-client",
+				// for laravel
+				"amiralizadeh9480.laravel-extra-intellisense",
+				"xdebug.php-debug",
+				// PHP formatter
+				"junstyle.php-cs-fixer",
+				// for Git
+				"mhutchie.git-graph",
+				"eamodio.gitlens",
+				// markdown extensions
+				"yzhang.markdown-all-in-one",
+				"bierner.markdown-mermaid",
+				"bpruitt-goddard.mermaid-markdown-syntax-highlighting",
+				// GitHub extensions
+				"GitHub.copilot",
+				"GitHub.copilot-chat",
+				"GitHub.vscode-pull-request-github",
+				// Docker
+				"ms-azuretools.vscode-docker",
+				// Others
+				"mikestead.dotenv",
+				"mrmlnc.vscode-apache",
+				"formulahendry.code-runner",
+				"wayou.vscode-todo-highlight",
+				// PHPUnit
+				"recca0120.vscode-phpunit"
+			],
+			"settings": {
+				"terminal.integrated.cwd": "${containerWorkspaceFolder}/src",
+				// ? https://goropikari.hatenablog.com/entry/vscode_remote_container_host
+				"remote.localPortHost": "allInterfaces",
+				// "editor.wordSeparators": "`~!@#%^&*()-=+[{]}\\|;:'\",.<>/?" // NOTE: 逆に使いにくくなったのでコメントアウト中
+				// highlight settings
+				"todohighlight.defaultStyle": {
+					"border": "1px solid #FFF",
+					"borderRadius": "3px"
+				},
+				"todohighlight.keywords": [
+					{
+						"text": "BUG:",
+						"color": "#FFFFFF",
+						"backgroundColor": "#DC3545"
+					},
+					{
+						"text": "NOTE:",
+						"color": "#FFFFFF",
+						"backgroundColor": "#98C379"
+					},
+					{
+						"text": "HACK:",
+						"color": "#FFFFFF",
+						"backgroundColor": "#C678DD"
+					},
+					{
+						"text": "DEBUG:",
+						"color": "#FFFFFF",
+						"backgroundColor": "#61AFEF"
+					},
+					{
+						"text": "WARN:",
+						"color": "#FFFFFF",
+						"backgroundColor": "#FFC107"
+					},
+					{
+						"text": "WARNING:",
+						"color": "#FFFFFF",
+						"backgroundColor": "#FFC107"
+					}
+				],
+				// githubPullRequests settings
+				"githubPullRequests.assignCreated": "wiz-kakiuchi",
+				// other settings
+				"files.watcherExclude": {
+					"**/.vendor/**": true
+				},
+				"search.exclude": {
+					"**/vendor/*/**": true
+				},
+				// php-cs-fixer settings
+				// FIXME: https://github.com/junstyle/vscode-php-cs-fixer/issues/197
+				// "php-cs-fixer.ignorePHPVersion": true,
+				"php-cs-fixer.config": "${containerWorkspaceFolder}/src/.php-cs-fixer.dist.php",
+				"php-cs-fixer.executablePath": "${extensionPath}/php-cs-fixer.phar",
+				// editor settings
+				"editor.formatOnSave": true,
+				"editor.formatOnPaste": false,
+				"[php]": {
+					"editor.defaultFormatter": "junstyle.php-cs-fixer"
+				},
+				// php settings
+				// NOTE: 開発者の環境によってはPHP実行パスが異なることがあるため明示的に開発コンテナ内のPHP実行パスを指定している
+				"php.validate.executablePath": "/usr/bin/php",
+				"php.debug.executablePath": "/usr/bin/php",
+				// PHPUnit
+				"phpunit.phpunit": "${containerWorkspaceFolder}/src/vendor/bin/phpunit",
+				"phpunit.args": [
+					"-c",
+					"${containerWorkspaceFolder}/src/phpunit.xml"
+				],
+				// PHPStan (LaraStan) settings
+				"phpstan.binPath": "vendor/bin/phpstan",
+				"phpstan.configFile": "phpstan.neon",
+				"phpstan.singleFileMode": true,
+				"phpstan.showProgress": true,
+				"phpstan.rootDir": "${containerWorkspaceFolder}/src",
+				"phpstan.checkValidity": false,
+				"phpstan.enableLanguageServer": false
+			}
+		}
+	}
+}

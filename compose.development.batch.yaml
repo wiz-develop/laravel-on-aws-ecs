@@ -1,0 +1,50 @@
+services:
+  example-batch-1:
+    container_name: ${COMPOSE_PROJECT_NAME}_example-batch-1
+    build:
+      target: development
+      dockerfile: ./docker/app/php-fpm/Dockerfile
+      additional_contexts:
+        php-fpm-ctx: ./docker/app/php-fpm
+      args:
+        PHP_VERSION: ${PHP_VERSION}
+    env_file:
+      - ./src/.env
+    environment:
+      CONTAINER_ROLE: batch
+    volumes:
+      - type: bind
+        source: ./src
+        target: /var/www/src
+        consistency: cached
+    depends_on:
+      db:
+        condition: service_healthy
+    command: [ "php", "artisan", "example-batch-1" ]
+    networks:
+      - common
+
+  example-batch-2:
+    container_name: ${COMPOSE_PROJECT_NAME}_example-batch-2
+    build:
+      target: development
+      dockerfile: ./docker/app/php-fpm/Dockerfile
+      additional_contexts:
+        php-fpm-ctx: ./docker/app/php-fpm
+      args:
+        PHP_VERSION: ${PHP_VERSION}
+    env_file:
+      - ./src/.env
+    environment:
+      CONTAINER_ROLE: batch
+    volumes:
+      - type: bind
+        source: ./src
+        target: /var/www/src
+        consistency: cached
+    depends_on:
+      db:
+        condition: service_healthy
+    command: [ "php", "artisan", "example-batch-2" ]
+    networks:
+      - common

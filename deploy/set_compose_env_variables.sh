@@ -1,0 +1,14 @@
+#!/bin/bash
+
+echo PHP_VERSION=8.3
+# echo MYSQL_VERSION=9.2
+# echo REDIS_VERSION=7.4
+
+echo APP_IMAGE_REPO_URI=$APP_IMAGE_REPO_URI
+echo WEB_IMAGE_REPO_URI=$WEB_IMAGE_REPO_URI
+echo IMAGE_TAG=$IMAGE_TAG
+
+# Dockerを起動するユーザーの情報を設定
+# NOTE: 例えば検証環境は2000:2000、本番環境は3000:3000など
+echo USER_UID=$USER_UID
+echo USER_GID=$USER_GID

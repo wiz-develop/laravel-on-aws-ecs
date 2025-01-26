@@ -1,0 +1,70 @@
+version: 0.2
+
+env:
+  variables:
+    DOCKER_BUILDKIT: "1"
+
+phases:
+  install:
+    commands:
+      - echo ℹ️ Set Env variables...
+      - AWS_ACCOUNT_ID=$(echo ${CODEBUILD_BUILD_ARN} | cut -f 5 -d :)
+      - ECR_ENDPOINT="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
+      - WEB_IMAGE_REPO_URI=${ECR_ENDPOINT}/${WEB_IMAGE_REPO_NAME}
+      - APP_IMAGE_REPO_URI=${ECR_ENDPOINT}/${APP_IMAGE_REPO_NAME}
+      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - IMAGE_TAG=${COMMIT_HASH:=latest}
+
+  pre_build:
+    commands:
+      - echo 🔐 Logging in to Amazon ECR...
+      - aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${ECR_ENDPOINT}
+
+      - echo 🔐 Logging in to Docker Hub...
+      - echo $DOCKER_HUB_PASSWORD | docker login -u $DOCKER_HUB_ID --password-stdin
+
+      - echo ⏳ Setting environment variables...
+      - bash ./deploy/set_compose_env_variables.sh >> ./.env
+
+      - echo ✨ Pre build completed on `date`
+
+  build:
+    commands:
+      - echo 🐳 Building the Docker image..
+      - docker compose --file compose.production.yaml build --push
+
+      - echo ✨ Build completed on `date`
+
+  post_build:
+    commands:
+      - echo 📋 Writing image definitions file...
+      - cd $CODEBUILD_SRC_DIR
+
+      # Initialize image definitions files
+      - echo "[" > apiImagedefinitions.json
+      - echo "[" > workerImagedefinitions.json
+
+      # For API Service
+      - printf '{"name":"web","imageUri":"%s"},' ${WEB_IMAGE_REPO_URI}:${IMAGE_TAG} >> apiImagedefinitions.json
+      - printf '{"name":"app","imageUri":"%s"},' ${APP_IMAGE_REPO_URI}:${IMAGE_TAG} >> apiImagedefinitions.json
+
+      # For Worker Services
+      - printf '{"name":"example-worker-1","imageUri":"%s"},' ${APP_IMAGE_REPO_URI}:${IMAGE_TAG} >> workerImagedefinitions.json
+      - printf '{"name":"example-worker-2","imageUri":"%s"},' ${APP_IMAGE_REPO_URI}:${IMAGE_TAG} >> workerImagedefinitions.json
+
+      # Close JSON array
+      - sed -i '$ s/,$//' apiImagedefinitions.json
+      - sed -i '$ s/,$//' workerImagedefinitions.json
+      - echo "]" >> apiImagedefinitions.json
+      - echo "]" >> workerImagedefinitions.json
+
+      - echo ✨ Post build completed on `date`
+
+artifacts:
+  files:
+    - apiImagedefinitions.json
+    - workerImagedefinitions.json
+
+cache:
+  paths:
+    - "/root/.m2/**/*"

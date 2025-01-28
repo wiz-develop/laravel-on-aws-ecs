@@ -12,6 +12,7 @@
         "php": "^8.3",
         "aws/aws-sdk-php": "^3.338",
         "laravel/framework": "^11.31",
+        "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
         "shiftonelabs/laravel-sqs-fifo-queue": "^3.0"
     },

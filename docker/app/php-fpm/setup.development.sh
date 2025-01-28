@@ -10,8 +10,8 @@ php artisan route:clear
 php artisan view:clear
 php artisan event:clear
 
-# NOTE: laravel 10.x～ 利用可能 のためコメントアウト中
-# php artisan storage:unlink
+# NOTE: laravel 10.x～
+php artisan storage:unlink
 
 # NOTE: /config/filesystems.php の `link` で定義されているシンボリックリンクをすべて作成する
 # 画像などの静的ファイルをクライアントから読み込むために必要

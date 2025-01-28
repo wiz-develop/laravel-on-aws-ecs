@@ -49,8 +49,7 @@ phases:
       - printf '{"name":"app","imageUri":"%s"},' ${APP_IMAGE_REPO_URI}:${IMAGE_TAG} >> apiImagedefinitions.json
 
       # For Worker Services
-      - printf '{"name":"example-worker-1","imageUri":"%s"},' ${APP_IMAGE_REPO_URI}:${IMAGE_TAG} >> workerImagedefinitions.json
-      - printf '{"name":"example-worker-2","imageUri":"%s"},' ${APP_IMAGE_REPO_URI}:${IMAGE_TAG} >> workerImagedefinitions.json
+      - printf '{"name":"example-emails-worker","imageUri":"%s"},' ${APP_IMAGE_REPO_URI}:${IMAGE_TAG} >> workerImagedefinitions.json
 
       # Close JSON array
       - sed -i '$ s/,$//' apiImagedefinitions.json

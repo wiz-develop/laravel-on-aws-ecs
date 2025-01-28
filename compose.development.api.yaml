@@ -72,13 +72,13 @@ services:
       #   condition: service_healthy
     networks:
       - common
-      # healthcheck:
-      # NOTE: cgi-fcgi リクエストを送ると、zend_mm_heap corrupted が発生する重大な問題があるため、コメントアウト中。
+    healthcheck:
+      # NOTE: cgi-fcgi リクエストを送ると、zend_mm_heap corrupted が発生する重大な問題がある。
       #  参考: https://github.com/php/php-src/issues/15395
       # PHP8.2以降の最新パッチバージョンでは修正されているが、PHP8.1系はまだ対応されていないっぽい。
       # 参考: https://www.php.net/ChangeLog-8.php#PHP_8_1
-      # test: [ "CMD-SHELL", "cgi-fcgi -bind -connect /run/php-fpm/www.sock 2>&1 || exit 1" ]
-      # interval: 30s
-      # timeout: 5s
-      # start_period: 30s
-      # retries: 3
+      test: [ "CMD-SHELL", "cgi-fcgi -bind -connect /run/php-fpm/www.sock 2>&1 || exit 1" ]
+      interval: 30s
+      timeout: 5s
+      start_period: 30s
+      retries: 3

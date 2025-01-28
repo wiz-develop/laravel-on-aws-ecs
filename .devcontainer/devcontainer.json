@@ -7,8 +7,8 @@
 		// "../compose.production.yaml",
 		"../compose.development.api.yaml",
 		"../compose.development.infra.yaml",
-		// "../compose.development.batch.yaml",
-		// "../compose.development.worker.yaml",
+		"../compose.development.batch.yaml",
+		"../compose.development.worker.yaml",
 		"./compose.yaml"
 	],
 	"service": "workspace",

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
 
     /*
@@ -39,7 +41,7 @@ return [
             'connection' => env('DB_QUEUE_CONNECTION'),
             'table' => env('DB_QUEUE_TABLE', 'jobs'),
             'queue' => env('DB_QUEUE', 'default'),
-            'retry_after' => (int) env('DB_QUEUE_RETRY_AFTER', 90),
+            'retry_after' => (int)env('DB_QUEUE_RETRY_AFTER', 90),
             'after_commit' => false,
         ],
 
@@ -47,7 +49,7 @@ return [
             'driver' => 'beanstalkd',
             'host' => env('BEANSTALKD_QUEUE_HOST', 'localhost'),
             'queue' => env('BEANSTALKD_QUEUE', 'default'),
-            'retry_after' => (int) env('BEANSTALKD_QUEUE_RETRY_AFTER', 90),
+            'retry_after' => (int)env('BEANSTALKD_QUEUE_RETRY_AFTER', 90),
             'block_for' => 0,
             'after_commit' => false,
         ],
@@ -63,11 +65,33 @@ return [
             'after_commit' => false,
         ],
 
+        // NOTE: LaravelデフォルトのSQSドライバーだと、FIFOキューを使うことができないため、カスタムドライバー(https://github.com/shiftonelabs/laravel-sqs-fifo-queue)を使用している
+        // 下記PRでFIFO対応されるかと思ったが、一蹴されているようだ 😇
+        // https://github.com/laravel/framework/pull/46364#issuecomment-1561277103
+        'sqs-fifo' => [
+            'driver' => 'sqs-fifo',
+            'key' => env('AWS_ACCESS_KEY_ID'),
+            'secret' => env('AWS_SECRET_ACCESS_KEY'),
+            'prefix' => env('SQS_FIFO_PREFIX', 'https://sqs.us-east-1.amazonaws.com/your-account-id'),
+            'queue' => env('SQS_FIFO_QUEUE', 'default.fifo'),
+            'suffix' => env('SQS_FIFO_SUFFIX'),
+            'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
+
+            // NOTE: elasticmq を利用できるようにする設定
+            // NOTE: https://github.com/aws/aws-sdk-php/issues/2947
+            'endpoint' => env('SQS_FIFO_PREFIX', 'https://sqs.us-east-1.amazonaws.com/your-account-id'),
+
+            'after_commit' => false,
+            'group' => 'default',
+            'deduplicator' => env('SQS_FIFO_DEDUPLICATOR', 'unique'),
+            'allow_delay' => env('SQS_FIFO_ALLOW_DELAY', false),
+        ],
+
         'redis' => [
             'driver' => 'redis',
             'connection' => env('REDIS_QUEUE_CONNECTION', 'default'),
             'queue' => env('REDIS_QUEUE', 'default'),
-            'retry_after' => (int) env('REDIS_QUEUE_RETRY_AFTER', 90),
+            'retry_after' => (int)env('REDIS_QUEUE_RETRY_AFTER', 90),
             'block_for' => null,
             'after_commit' => false,
         ],

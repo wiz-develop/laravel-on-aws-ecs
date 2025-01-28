@@ -1,6 +1,6 @@
 services:
-  example-worker-1:
-    container_name: ${COMPOSE_PROJECT_NAME}_example-worker-1
+  example-emails-worker:
+    container_name: ${COMPOSE_PROJECT_NAME}_example-emails-worker
     build:
       target: development
       dockerfile: ./docker/app/php-fpm/Dockerfile
@@ -12,40 +12,7 @@ services:
       - ./src/.env
     environment:
       CONTAINER_ROLE: worker
-      SQS_FIFO_QUEUE: "example-worker-1.fifo"
-    volumes:
-      - type: bind
-        source: ./src
-        target: /var/www/src
-        consistency: cached
-    depends_on:
-      db:
-        condition: service_healthy
-      elasticmq:
-        condition: service_healthy
-    networks:
-      - common
-    healthcheck:
-      test: [ "CMD-SHELL", "pgrep -f 'php artisan queue:work' || exit 1" ]
-      interval: 60s
-      timeout: 5s
-      start_period: 30s
-      retries: 3
-
-  example-worker-2:
-    container_name: ${COMPOSE_PROJECT_NAME}_example-worker-2
-    build:
-      target: development
-      dockerfile: ./docker/app/php-fpm/Dockerfile
-      additional_contexts:
-        php-fpm-ctx: ./docker/app/php-fpm
-      args:
-        PHP_VERSION: ${PHP_VERSION}
-    env_file:
-      - ./src/.env
-    environment:
-      CONTAINER_ROLE: worker
-      SQS_FIFO_QUEUE: "example-worker-2.fifo"
+      SQS_FIFO_QUEUE: "example-emails.fifo"
     volumes:
       - type: bind
         source: ./src

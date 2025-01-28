@@ -52,8 +52,8 @@ services:
     profiles:
       - nosql
 
-  queue:
-    container_name: ${COMPOSE_PROJECT_NAME}_queue
+  elasticmq:
+    container_name: ${COMPOSE_PROJECT_NAME}_elasticmq
     image: softwaremill/elasticmq:latest
     ports:
       - "${HOST_ADDR}9324:9324"

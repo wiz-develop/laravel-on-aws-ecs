@@ -41,8 +41,17 @@ RUN \
     # Unixソケット通信用のディレクトリを作成
     && mkdir -p \
     /run/php-fpm \
+    /var/log/php-fpm \
     && chown -R ${USERNAME}:${USERNAME} \
-    /run/php-fpm
+    /run/php-fpm \
+    /var/log/php-fpm \
+    # NOTE: アクセスログ、エラーログ、スローログをdockerログに転送するためシンボリックリンクを作成
+    # NOTE: php-fpm closes STDOUT on startup, so sending logs to /proc/self/fd/1 does not work.
+    # NOTE: https://bugs.php.net/bug.php?id=73886
+    && ln -sf /proc/self/fd/2 /var/log/php-fpm/error.log \
+    && ln -sf /proc/self/fd/2 /var/log/php-fpm/www-access.log \
+    && ln -sf /proc/self/fd/2 /var/log/php-fpm/www-error.log \
+    && ln -sf /proc/self/fd/2 /var/log/php-fpm/www-slow.log
 
 # PHP-FPM の設定ファイルをコピー
 COPY --from=php-fpm-ctx ./php-fpm.conf /etc/php-fpm.conf

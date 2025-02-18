@@ -2,7 +2,7 @@
 // https://github.com/microsoft/vscode-dev-containers/tree/v0.245.2/containers/php-mariadb
 // Update the VARIANT arg in compose.yaml to pick a PHP version
 {
-	"name": "laravel-on-aws-ecs-backend-workspace",
+	"name": "${containerEnv:WORKSPACE_NAME}",
 	"dockerComposeFile": [
 		// "../compose.production.yaml",
 		"../compose.development.api.yaml",
@@ -53,58 +53,22 @@
 				"GitHub.copilot",
 				"GitHub.copilot-chat",
 				"GitHub.vscode-pull-request-github",
-				// Docker
-				"ms-azuretools.vscode-docker",
+				// PHPUnit
+				"recca0120.vscode-phpunit",
+				// PHPStan
+				"SanderRonde.phpstan-vscode",
 				// Others
 				"mikestead.dotenv",
 				"mrmlnc.vscode-apache",
 				"formulahendry.code-runner",
 				"wayou.vscode-todo-highlight",
-				// PHPUnit
-				"recca0120.vscode-phpunit"
+				"usernamehw.errorlens"
 			],
 			"settings": {
 				"terminal.integrated.cwd": "${containerWorkspaceFolder}/src",
 				// ? https://goropikari.hatenablog.com/entry/vscode_remote_container_host
 				"remote.localPortHost": "allInterfaces",
 				// "editor.wordSeparators": "`~!@#%^&*()-=+[{]}\\|;:'\",.<>/?" // NOTE: 逆に使いにくくなったのでコメントアウト中
-				// highlight settings
-				"todohighlight.defaultStyle": {
-					"border": "1px solid #FFF",
-					"borderRadius": "3px"
-				},
-				"todohighlight.keywords": [
-					{
-						"text": "BUG:",
-						"color": "#FFFFFF",
-						"backgroundColor": "#DC3545"
-					},
-					{
-						"text": "NOTE:",
-						"color": "#FFFFFF",
-						"backgroundColor": "#98C379"
-					},
-					{
-						"text": "HACK:",
-						"color": "#FFFFFF",
-						"backgroundColor": "#C678DD"
-					},
-					{
-						"text": "DEBUG:",
-						"color": "#FFFFFF",
-						"backgroundColor": "#61AFEF"
-					},
-					{
-						"text": "WARN:",
-						"color": "#FFFFFF",
-						"backgroundColor": "#FFC107"
-					},
-					{
-						"text": "WARNING:",
-						"color": "#FFFFFF",
-						"backgroundColor": "#FFC107"
-					}
-				],
 				// githubPullRequests settings
 				"githubPullRequests.assignCreated": "wiz-kakiuchi",
 				// other settings
@@ -135,14 +99,15 @@
 					"-c",
 					"${containerWorkspaceFolder}/src/phpunit.xml"
 				],
-				// PHPStan (LaraStan) settings
+				// PHPStan settings
 				"phpstan.binPath": "vendor/bin/phpstan",
-				"phpstan.configFile": "phpstan.neon",
-				"phpstan.singleFileMode": true,
+				"phpstan.configFile": "phpstan.neon.dist",
+				"phpstan.singleFileMode": false,
 				"phpstan.showProgress": true,
 				"phpstan.rootDir": "${containerWorkspaceFolder}/src",
 				"phpstan.checkValidity": false,
-				"phpstan.enableLanguageServer": false
+				"phpstan.showTypeOnHover": true,
+				"phpstan.memoryLimit": "1G"
 			}
 		}
 	}

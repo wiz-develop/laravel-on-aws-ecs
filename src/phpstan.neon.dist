@@ -1,0 +1,19 @@
+includes:
+    # Laravel用のPHPStan拡張
+    - vendor/larastan/larastan/extension.neon
+    # bladeファイル用のPHPStan拡張
+    - vendor/tomasvotruba/bladestan/config/extension.neon
+
+parameters:
+    # NOTE: %rootDir% is `vendor/phpstan/phpstan`
+    tmpDir: %rootDir%/tmp
+    level: max
+    paths:
+        - app
+        - bootstrap
+        - tests
+    excludePaths:
+        analyseAndScan:
+            - vendor
+            - storage
+            - bootstrap/cache

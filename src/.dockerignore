@@ -32,3 +32,5 @@ vite.config.js
 .env.development.example
 .env.staging.example
 .env.production.example
+
+_ide_helper.php

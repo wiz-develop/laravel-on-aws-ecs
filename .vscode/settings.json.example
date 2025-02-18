@@ -1,0 +1,43 @@
+{
+    // NOTE: highlight settings
+    "todohighlight.defaultStyle": {
+        "border": "1px solid #FFF",
+        "borderRadius": "3px"
+    },
+    "todohighlight.keywords": [
+        {
+            "text": "BUG:",
+            "color": "#FFFFFF",
+            "backgroundColor": "#DC3545"
+        },
+        {
+            "text": "NOTE:",
+            "color": "#FFFFFF",
+            "backgroundColor": "#98C379"
+        },
+        {
+            "text": "HACK:",
+            "color": "#FFFFFF",
+            "backgroundColor": "#C678DD"
+        },
+        {
+            "text": "DEBUG:",
+            "color": "#FFFFFF",
+            "backgroundColor": "#61AFEF"
+        },
+        {
+            "text": "WARN:",
+            "color": "#FFFFFF",
+            "backgroundColor": "#FFC107"
+        },
+        {
+            "text": "WARNING:",
+            "color": "#FFFFFF",
+            "backgroundColor": "#FFC107"
+        }
+    ],
+    // PHPStan settings
+    "phpstan.enabled": true,
+    // editor settings
+    "editor.formatOnSave": true
+}

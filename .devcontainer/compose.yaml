@@ -8,6 +8,8 @@ services:
         USER_UID: "${HOST_UID}" # .envのHOST_UIDを渡す
         USER_GID: "${HOST_GID}" # .envのHOST_GIDを渡す
     env_file: ./.devcontainer/devcontainer.env
+    environment:
+      WORKSPACE_NAME: ${COMPOSE_PROJECT_NAME}_workspace
     volumes:
       - type: volume
         source: php-fpm-socket
@@ -18,7 +20,5 @@ services:
         consistency: cached
     command: sleep infinity
     working_dir: /var/www
-    depends_on:
-      - web
     networks:
       - common

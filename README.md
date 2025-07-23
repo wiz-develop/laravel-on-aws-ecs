@@ -76,7 +76,7 @@
 `deploy/buildspec.yml`では、Docker Compose（Buildx bake）を使用してマルチプラットフォームイメージをビルドしています：
 
 ```bash
-docker buildx bake -f compose.production.yaml --set *.platform=linux/amd64,linux/arm64 --push
+docker buildx bake -f compose.production.yaml --push
 ```
 
 `compose.production.yaml`には、各サービスに`platforms`設定が追加されています：
@@ -99,8 +99,8 @@ services:
 docker buildx create --name multi-platform-builder --use
 docker buildx inspect --bootstrap
 
-# Composeを使ったマルチプラットフォームビルド
-docker buildx bake -f compose.production.yaml --set *.platform=linux/amd64,linux/arm64 --push
+# Composeを使ったマルチプラットフォームビルド（プッシュあり）
+docker buildx bake -f compose.production.yaml --push
 
 # または、通常のdocker composeコマンドでビルド（プッシュなし）
 docker compose -f compose.production.yaml build

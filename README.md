@@ -63,3 +63,58 @@
 | `app-builder` | Web API Builder |                       |
 
 
+## 🚀 Multi-Architecture Support (ARM64/Graviton)
+
+このプロジェクトは、AWS Gravitonプロセッサ（ARM64アーキテクチャ）をサポートしています。
+
+### 特徴
+- **マルチアーキテクチャ対応**: AMD64（x86_64）とARM64の両方のアーキテクチャに対応
+- **自動ビルド**: AWS CodeBuildでDocker Buildxを使用して自動的にマルチプラットフォームイメージをビルド
+- **Graviton最適化**: AWS Gravitonインスタンスで実行することでコストパフォーマンスが向上
+
+### ビルドの仕組み
+`deploy/buildspec.yml`では、Docker Composeを使用してマルチプラットフォームイメージをビルドしています：
+
+```bash
+docker compose --file compose.production.yaml build --push
+```
+
+`compose.production.yaml`には、各サービスに`platforms`設定が追加されています：
+
+```yaml
+services:
+  web:
+    build:
+      platforms:
+        - linux/amd64
+        - linux/arm64
+      # ... 他の設定
+```
+
+### ローカル開発環境でのマルチプラットフォームビルド
+ローカル環境でマルチプラットフォームイメージをビルドする場合、以下の2つの方法があります：
+
+#### 方法1: Docker Compose（推奨）
+```bash
+# 通常のdocker composeコマンドでビルド（プッシュなし）
+docker compose -f compose.production.yaml build
+
+# プッシュも含める場合
+docker compose -f compose.production.yaml build --push
+```
+
+#### 方法2: Docker Buildx Bake
+```bash
+# Docker Buildxの初期化
+docker buildx create --name multi-platform-builder --use
+docker buildx inspect --bootstrap
+
+# Buildx bakeを使ったマルチプラットフォームビルド
+docker buildx bake -f compose.production.yaml --push
+```
+
+**注意**: 方法1はDocker Compose v2.4.0以降が必要です。古いバージョンを使用している場合は方法2をご利用ください。
+
+### ECSでの使用
+- ECSタスク定義で`arm64`アーキテクチャを指定することで、Gravitonインスタンスでコンテナを実行できます
+- 同じイメージがAMD64とARM64の両方で動作するため、アーキテクチャ間の移行が容易です

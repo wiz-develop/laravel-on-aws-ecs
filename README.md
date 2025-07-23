@@ -73,10 +73,10 @@
 - **Graviton最適化**: AWS Gravitonインスタンスで実行することでコストパフォーマンスが向上
 
 ### ビルドの仕組み
-`deploy/buildspec.yml`では、Docker Compose（Buildx bake）を使用してマルチプラットフォームイメージをビルドしています：
+`deploy/buildspec.yml`では、Docker Composeを使用してマルチプラットフォームイメージをビルドしています：
 
 ```bash
-docker buildx bake -f compose.production.yaml --push
+docker compose --file compose.production.yaml build --push
 ```
 
 `compose.production.yaml`には、各サービスに`platforms`設定が追加されています：
@@ -92,19 +92,28 @@ services:
 ```
 
 ### ローカル開発環境でのマルチプラットフォームビルド
-ローカル環境でマルチプラットフォームイメージをビルドする場合：
+ローカル環境でマルチプラットフォームイメージをビルドする場合、以下の2つの方法があります：
 
+#### 方法1: Docker Compose（推奨）
+```bash
+# 通常のdocker composeコマンドでビルド（プッシュなし）
+docker compose -f compose.production.yaml build
+
+# プッシュも含める場合
+docker compose -f compose.production.yaml build --push
+```
+
+#### 方法2: Docker Buildx Bake
 ```bash
 # Docker Buildxの初期化
 docker buildx create --name multi-platform-builder --use
 docker buildx inspect --bootstrap
 
-# Composeを使ったマルチプラットフォームビルド（プッシュあり）
+# Buildx bakeを使ったマルチプラットフォームビルド
 docker buildx bake -f compose.production.yaml --push
-
-# または、通常のdocker composeコマンドでビルド（プッシュなし）
-docker compose -f compose.production.yaml build
 ```
+
+**注意**: 方法1はDocker Compose v2.4.0以降が必要です。古いバージョンを使用している場合は方法2をご利用ください。
 
 ### ECSでの使用
 - ECSタスク定義で`arm64`アーキテクチャを指定することで、Gravitonインスタンスでコンテナを実行できます

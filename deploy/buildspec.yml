@@ -35,7 +35,7 @@ phases:
   build:
     commands:
       - echo 🐳 Building the Docker images for multiple platforms (linux/amd64,linux/arm64)...
-      - docker buildx bake -f compose.production.yaml --push
+      - docker compose --file compose.production.yaml build --push
 
       - echo ✨ Build completed on `date`
 

@@ -26,6 +26,9 @@ services:
       additional_contexts:
         # apache-ctx: ./docker/web/apache
         nginx-ctx: ./docker/web/nginx
+      platforms:
+        - linux/amd64
+        - linux/arm64
       args:
         BUILDKIT_INLINE_CACHE: 1
         USER_UID: "${USER_UID-1000}"
@@ -67,6 +70,9 @@ services:
       additional_contexts:
         php-fpm-ctx: ./docker/app/php-fpm
         src-ctx: ./src
+      platforms:
+        - linux/amd64
+        - linux/arm64
       args:
         BUILDKIT_INLINE_CACHE: 1
         USER_UID: "${USER_UID-1000}"
@@ -116,6 +122,9 @@ services:
       additional_contexts:
         php-fpm-ctx: ./docker/app/php-fpm
         src-ctx: ./src
+      platforms:
+        - linux/amd64
+        - linux/arm64
       args:
         BUILDKIT_INLINE_CACHE: 1
         USER_UID: "${USER_UID-1000}"
